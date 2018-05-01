@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="别名Wrapper 使用装饰者模式的主要是为了可以在客户端代码灵活地给对象增加预定义的行为。也就是可以在客户端代码中动态地用一个个的行为来装饰需要这些行为的对象，而不是在继承中获得这些行为。(这里的行为主要是指一些完成某类功能的方法内容，通过通常重写+调用父类方法来实现) 如有问题，是我错了，参考《设计模式》中对intent的描述:  Attach additional responsibilit">
+<meta name="keywords" content="设计模式 装饰者模式 Decorator">
+<meta property="og:type" content="article">
+<meta property="og:title" content="装饰者模式">
+<meta property="og:url" content="http://yunzhou.me/2014/07/03/Decorator/index.html">
+<meta property="og:site_name" content="Yunzhou">
+<meta property="og:description" content="别名Wrapper 使用装饰者模式的主要是为了可以在客户端代码灵活地给对象增加预定义的行为。也就是可以在客户端代码中动态地用一个个的行为来装饰需要这些行为的对象，而不是在继承中获得这些行为。(这里的行为主要是指一些完成某类功能的方法内容，通过通常重写+调用父类方法来实现) 如有问题，是我错了，参考《设计模式》中对intent的描述:  Attach additional responsibilit">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yunzhou.me/2014/07/03/resources/images/Decorator/lizi.jpg">
+<meta property="og:image" content="http://yunzhou.me/2014/07/03/resources/images/Decorator/MotoX.png">
+<meta property="og:image" content="http://yunzhou.me/2014/07/03/resources/images/Decorator/Decorator.png">
+<meta property="og:image" content="http://yunzhou.me/2014/07/03/resources/images/payment.jpg">
+<meta property="og:updated_time" content="2018-05-01T15:47:26.814Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="装饰者模式">
+<meta name="twitter:description" content="别名Wrapper 使用装饰者模式的主要是为了可以在客户端代码灵活地给对象增加预定义的行为。也就是可以在客户端代码中动态地用一个个的行为来装饰需要这些行为的对象，而不是在继承中获得这些行为。(这里的行为主要是指一些完成某类功能的方法内容，通过通常重写+调用父类方法来实现) 如有问题，是我错了，参考《设计模式》中对intent的描述:  Attach additional responsibilit">
+<meta name="twitter:image" content="http://yunzhou.me/2014/07/03/resources/images/Decorator/lizi.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yunzhou.me/2014/07/03/Decorator/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>装饰者模式 | Yunzhou</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Yunzhou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">见闻</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yunzhou.me/2014/07/03/Decorator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yunzhou">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Yunzhou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">装饰者模式
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2014-07-03 22:34:46" itemprop="dateCreated datePublished" datetime="2014-07-03T22:34:46+08:00">2014-07-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-05-01 23:47:26" itemprop="dateModified" datetime="2018-05-01T23:47:26+08:00">2018-05-01</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>别名Wrapper</p>
+<p>使用装饰者模式的主要是为了可以在客户端代码灵活地给对象增加预定义的行为。也就是可以在客户端代码中动态地用一个个的行为来装饰需要这些行为的对象，而不是在继承中获得这些行为。(这里的行为主要是指一些完成某类功能的方法内容，通过通常重写+调用父类方法来实现)</p>
+<p>如有问题，是我错了，参考《设计模式》中对intent的描述:</p>
+<blockquote>
+<p>Attach additional responsibilities to an object dynamically.<br>Decorators provide a flexible alternative to subclassing for<br>extending functionality.</p>
+</blockquote>
+<h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p><img src="../resources/images/Decorator/lizi.jpg" alt="栗子"></p>
+<h3 id="待解决问题"><a href="#待解决问题" class="headerlink" title="待解决问题"></a>待解决问题</h3><p>现在很多手机(比如Moto X)都提供了定制服务，为了配合我们装饰者模式，假设所有的定制服务都是添加服务，比如手机壳换颜色就相当于添加了一个颜色服务。现在我们问题是计算定制机型的价格，每个定制服务都有其相应的价格。</p>
+<h3 id="准备这样子做"><a href="#准备这样子做" class="headerlink" title="准备这样子做"></a>准备这样子做</h3><p>好了，我们首先需要一个最基本的裸机类(MotoX)，然后所有的这些定制服务怎么添加上去呢？正常情况下，我们会想到继承，比如每一种定制类型的机器都是继承自裸机类(MotoX)，像红色前框的木制后壳MotoX(RedFrontWoodBackMotoX)。这样似乎是解决问题了，前提是定制服务很少。</p>
+<h3 id="不要吓我"><a href="#不要吓我" class="headerlink" title="不要吓我"></a>不要吓我</h3><p>大家会想到一个这样的问题，如果我们提供了5种不同类型的服务(注:MotoX提供了Back,Front,Accent,Signature,Case五种定制服务),算一下组合数，可以知道一共有2^5也就是32种，那我们岂不是要建立32个子类来继承MotoX?</p>
+<p>另外，我们如果添加了一个新的类型定制服务，比如无线充电(Wireless Charging)，那我们可以一下子添加32个子类，好了，今晚又要加班了。那再加一个厚电(AdditionBattery)?OK，64个子类在路上。</p>
+<p>假设定制机的被购买数量服从正态分布（越多定制机型服从的概率越大），那主要的几种机型被用得很多，有些子类则不怎么被用到（会有一些棋盘机型没有人定制的），甚至没有被用到，想想就觉得浪费，一样的工作量，凭什么我（指定制机类）不能上场？？？</p>
+<h3 id="还有一些问题"><a href="#还有一些问题" class="headerlink" title="还有一些问题"></a>还有一些问题</h3><p>如果签名服务或者无线充电服务的价格有变化，可以提供的颜色的服务价格有变化，嘿嘿，我们要动32个类:(（虽然实际中可能每个子类都可以提供属性的set/get方法，但是我们现在为了捧po主，尽量往坏里面想:)）。</p>
+<h2 id="据说是这样子解决的"><a href="#据说是这样子解决的" class="headerlink" title="据说是这样子解决的"></a>据说是这样子解决的</h2><p>程序员都是很懒的，如此不优雅的解决方法已经恶心了一大票强迫症患者，于是下面的解决方法就出现了：<br>我们把每一种定制服务做成一个提供定制一种装饰子类，用来装饰MotoX（所以也叫Wrapper模式）。这些定制服务的装饰类，可以装饰裸机(MotoX)，也可以装饰别的服务子类(前提是该子类沿着装饰子类路径上去可以找到一个裸机)。忍不住看代码了吧:</p>
+<p>比如我们需要一个带无线，红色后盖，签名为mooncake的MotoX<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MotoXMobile mobile = <span class="keyword">new</span> SignatureCustomize(</span><br><span class="line">               <span class="keyword">new</span> WirelessChargingCustomize(</span><br><span class="line">                       <span class="keyword">new</span> BackCustomize(</span><br><span class="line">                               <span class="keyword">new</span> MotoX(<span class="number">399</span>), <span class="string">"red"</span>, <span class="number">29</span>), <span class="number">50</span>), <span class="string">"mooncake"</span>, <span class="number">30</span>);</span><br><span class="line"></span><br><span class="line">       mobile.Describe();</span><br><span class="line">       System.out.println();</span><br><span class="line">       System.out.println(\<span class="string">"the customized Moto X cost \" + mobile.Cost() + "</span> USD<span class="string">");</span></span><br></pre></td></tr></table></figure></p>
+<p>那末，这些具体要怎么实现呢？</p>
+<ul>
+<li>接口一致：每一个装饰类（也就是定制类）的对象实际上就可以看成一个MotoX的对象，所以，我们的装饰类（Customize）和被装饰类（MotoX）要有同一个父类（MotoXMobile），或者实现同一个接口。看代码：</li>
+</ul>
+<p>公共父类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">MotoXMobile</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> cost;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">Describe</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">int</span> <span class="title">Cost</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>被装饰类<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MotoX</span> <span class="keyword">extends</span> <span class="title">MotoXMobile</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MotoX</span><span class="params">(<span class="keyword">int</span> cost)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.cost = cost;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Describe</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.print(<span class="string">"Moto X with"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">Cost</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> cost;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>装饰类(如果装饰类的行为比较少的话，就不用写这个抽象类了，又或者使用其它模式)<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Customize</span> <span class="keyword">extends</span> <span class="title">MotoXMobile</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> MotoXMobile mobile;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">Describe</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">int</span> <span class="title">Cost</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSignature</span><span class="params">(String signature)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.signature = signature;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>装饰类是透明的：装饰类也就是定制服务的类，实际上是透明的，也就是说每一个装饰类或者被装饰类的对象实际上都可以看成一个MotoXMobile的实例，既然可以看成同一个东西，所以需要在装饰类中持有一个MotoXMoible类的对象来表示它装饰的对象。看个性签名装饰类的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SignatureCustomize</span> <span class="keyword">extends</span> <span class="title">Customize</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String signature;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SignatureCustomize</span><span class="params">(MotoXMobile mobile, String signature, <span class="keyword">int</span> cost)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mobile = mobile;</span><br><span class="line">        <span class="keyword">this</span>.cost = cost;</span><br><span class="line">        <span class="keyword">this</span>.signature = signature;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Describe</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mobile.Describe();</span><br><span class="line">        System.out.print(<span class="string">" Signature&#123; "</span> + signature + <span class="string">" &#125; "</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">Cost</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.mobile.Cost() + <span class="keyword">this</span>.cost;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后看测试客户端代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MotoXMobile mobile = <span class="keyword">new</span> SignatureCustomize(</span><br><span class="line">                <span class="keyword">new</span> WirelessChargingCustomize(</span><br><span class="line">                        <span class="keyword">new</span> BackCustomize(</span><br><span class="line">                                <span class="keyword">new</span> MotoX(<span class="number">399</span>), <span class="string">"red"</span>, <span class="number">29</span>), <span class="number">50</span>), <span class="string">"mooncake"</span>, <span class="number">30</span>);</span><br><span class="line"></span><br><span class="line">        ((SignatureCustomize)mobile).setSignature(<span class="string">"dajiao"</span>);</span><br><span class="line"></span><br><span class="line">        mobile.Describe();</span><br><span class="line">        System.out.println();</span><br><span class="line">        System.out.println(<span class="string">"the customized Moto X cost "</span> + mobile.Cost() + <span class="string">" USD"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>它的输出是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Moto X with BackCover&#123; Color red &#125;  Wireless Charging  Signature&#123; dajiao &#125; </span><br><span class="line">the customized Moto X cost 508 USD</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p>在定制类中进行添加内容<br>看上面的代码中，我们可以在某些定制类中添加行为（重写方法或者添加新方法）或者相关数据域。比如在signature类中有签名字符串的数据域，还可以添加一些改变签名字符串的方法。不过这样在使用指定方法前需要强制格式转换一下。</p>
+</li>
+<li><p>好了，我们看下类图(代码用Intellij IDEA编写，所以用的是它的UML插件自动生成的类图，貌似显示有点小问题，不过不影响观看)</p>
+</li>
+</ul>
+<p><img src="../resources/images/Decorator/MotoX.png" alt="MotoXMobile类图"></p>
+<h2 id="栗子们"><a href="#栗子们" class="headerlink" title="栗子们"></a>栗子们</h2><p>还有一大波栗子等待认领：</p>
+<ul>
+<li><p>《Head First 设计模式》中就使用了猩疤客咖啡做栗子。</p>
+<blockquote>
+<p>每一杯咖啡（或者奶茶，又或者其他饮料们）都是一个被装饰类。<br>那么奶泡，摩卡这些添加物就是装饰者了，于是它们就可以创造出各种带奶泡和摩卡的咖啡，带奶泡非冰的奶茶等等。</p>
+</blockquote>
+</li>
+<li><p>《设计模式》 中的TextView</p>
+<blockquote>
+<p>比如要添加滚动条Scrollingbar，或者一些Boarder等等，都可以修饰TextView。</p>
+</blockquote>
+</li>
+<li><p>又比如汽车的定制，一些豪华版，定制版，各种配置都可以用来修饰裸车。</p>
+</li>
+</ul>
+<h2 id="上升一个高度"><a href="#上升一个高度" class="headerlink" title="上升一个高度"></a>上升一个高度</h2><p>总结一下，装饰者模式有几个组成部分：</p>
+<ul>
+<li>Component ：抽象类或者接口，装饰者和被装饰者都继承于它或者实现它。</li>
+<li>ConcreteComponent ：具体的被装饰者，也就是上面栗子中的MotoX，咖啡，奶茶，TextView，裸车等等。</li>
+<li>Decorator ：装饰者的抽象类，通常装饰完了时候会叫做带无线充电的MotoX，加奶泡的咖啡，带ScrollingBar的TextView，注意，这里”的”字后面的词才是它的真实面目。</li>
+<li>ConcreteDecorator ：具体的装饰类，签名，无线充电，奶泡等等。</li>
+</ul>
+<h2 id="装饰者模式高清无码图"><a href="#装饰者模式高清无码图" class="headerlink" title="装饰者模式高清无码图"></a>装饰者模式高清无码图</h2><p><img src="../resources/images/Decorator/Decorator.png" alt="Decorator"></p>
+<h2 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h2><p>注:这里的优缺点都是看书本，搜索得来的，外加一点点自己的观点，除了写demo外，实际项目没用过decorator模式，不喜勿信，如有错漏，是我错了。</p>
+<ul>
+<li>比继承灵活不是么？妈妈再也不用担心我加班了。</li>
+<li>代码量还少了不是么？自从用了装饰者就不用堆一群子类在那里，顿时清爽了很多，谁用谁知道。</li>
+<li>虽然装饰者类和被装饰者类在抽象层面看起来都是一样，但是一旦被装饰过后，那就是另外一个类了，所以不要出现类似（==）这些判断来试图去判断还是不是大明湖畔的夏雨荷，人家早改嫁了。</li>
+<li>据说有很多小的对象会在代码中出现，比如各种修饰过后的对象啊，特么都叫MotoXMobile，可我们不知道它到底是哪个MotoXmobile啊。（会让代码看起来复杂的东西都可以通过消耗更多时间来解决）</li>
+</ul>
+<h2 id="现实中的栗子"><a href="#现实中的栗子" class="headerlink" title="现实中的栗子"></a>现实中的栗子</h2><ul>
+<li>很多GUI库就是通过装饰者模式来实现的</li>
+<li>java.io库中的流Stream</li>
+<li>Android源码中的Context,ContextImpl,ContextWrapper,Activity,Service,Application<br>  (因为时间比较局促，没有在这里分析这些源码)</li>
+</ul>
+<h2 id="好基友们"><a href="#好基友们" class="headerlink" title="好基友们"></a>好基友们</h2><p>这里根据《设计模式》中内容简单说下与其它模式的联系:</p>
+<ul>
+<li><p>适配器模式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">适配器模式那是继承了整个接口(ITarget)，然后适配器类(Adapter)通过继承或者持有已存在的类/类的对象(Adaptee, 注意这里是ee结尾，表示被适配的类)来获得已经存在的方法，然后就可以以接口的身份出来露面了，虽然内部是通过Adaptee的方法来实现的。虽然看起来联系不大，不过貌似多重适配之后也有那么点几毛钱相似了。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>组合模式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">组合模式是Composize类中维持着一群Component，比如文件目录树结构，而装饰者类只是持有一个component，这不是重点，重点是装饰者类会给被装饰者增加一些内容。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>策略模式:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">用书上的话讲，装饰者模式只是改变外表，但是策略模式则改变了内部实现，某个类中可以持有继承自同一个父类的子类对象，不同的子类内部实现不一样。当然，我们可以通过持有多个不同策略对象来实现类似装饰者模式的样子。</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="一些废话"><a href="#一些废话" class="headerlink" title="一些废话"></a>一些废话</h2><ul>
+<li><p>有个软件设计原则: 类应该对扩展开发，对修改关闭。个人觉得目的主要是在不修改原代码的情况下，进行功能扩展。至于对修改关闭的目的，鬼知道有多少代码依赖于现在的类，随意改容易出大事，今晚又要晚走。</p>
+</li>
+<li><p>为了介绍装饰者模式，所以优缺点会相对说得深刻一点，实际项目中的需求估计(只是估计)不会太典型，不同模式虽然有优缺点，但是有些缺点或许可以通过别的方式来弥补，所有一切以实际应用为主，用得爽就好。</p>
+</li>
+<li><p>上面的内容很多是个人总结，如有不准确或者错漏的地方，烦请指正，你是好人。</p>
+</li>
+<li><p>废话有点多，不习惯的话我可以改。</p>
+</li>
+</ul>
+<h2 id="简单demo代码"><a href="#简单demo代码" class="headerlink" title="简单demo代码"></a>简单demo代码</h2><p>代码比较简单，如果要看，下面是地址</p>
+<p><a href="https://github.com/mck-dajiao/DesignPatterns.git" target="_blank" rel="noopener">https://github.com/mck-dajiao/DesignPatterns.git</a></p>
+<h2 id="打赏"><a href="#打赏" class="headerlink" title="打赏"></a>打赏</h2><p>如果你看了文章之后想给我打赏，厉害了！真爱！<br><img src="../resources/images/payment.jpg" alt="打赏"></p>
+<p>All right not reserved.By mooncake</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/设计模式-装饰者模式-Decorator/" rel="tag"># 设计模式 装饰者模式 Decorator</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/07/09/visitor/" rel="prev" title="访问者模式">
+                访问者模式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Yunzhou</p>
+              <p class="site-description motion-element" itemprop="description">Android Developer</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#举个栗子"><span class="nav-number">1.</span> <span class="nav-text">举个栗子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#待解决问题"><span class="nav-number">1.1.</span> <span class="nav-text">待解决问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#准备这样子做"><span class="nav-number">1.2.</span> <span class="nav-text">准备这样子做</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不要吓我"><span class="nav-number">1.3.</span> <span class="nav-text">不要吓我</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#还有一些问题"><span class="nav-number">1.4.</span> <span class="nav-text">还有一些问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#据说是这样子解决的"><span class="nav-number">2.</span> <span class="nav-text">据说是这样子解决的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#栗子们"><span class="nav-number">3.</span> <span class="nav-text">栗子们</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#上升一个高度"><span class="nav-number">4.</span> <span class="nav-text">上升一个高度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#装饰者模式高清无码图"><span class="nav-number">5.</span> <span class="nav-text">装饰者模式高清无码图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优缺点"><span class="nav-number">6.</span> <span class="nav-text">优缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#现实中的栗子"><span class="nav-number">7.</span> <span class="nav-text">现实中的栗子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#好基友们"><span class="nav-number">8.</span> <span class="nav-text">好基友们</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些废话"><span class="nav-number">9.</span> <span class="nav-text">一些废话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单demo代码"><span class="nav-number">10.</span> <span class="nav-text">简单demo代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#打赏"><span class="nav-number">11.</span> <span class="nav-text">打赏</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yunzhou</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.2.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
